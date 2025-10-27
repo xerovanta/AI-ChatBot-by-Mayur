@@ -1,18 +1,10 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import z from 'zod';
-import { conversationRepository } from './repositories/conversation.repository';
+import { chatService } from './services/chat.service';
 
 dotenv.config();
-
-if (!process.env.GEMINI_API_KEY) {
-   throw new Error('❌ GEMINI_API_KEY is missing in .env file');
-}
-
-const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 const app = express();
 app.use(express.json());
@@ -32,38 +24,24 @@ const chatSchema = z.object({
       .trim()
       .min(1, 'Prompt is required.')
       .max(1000, 'Prompt is too long (max 1000 characters)'),
-   conversationID: z.string().uuid(),
+   conversationID: z.string().uuid('Invalid Conversation ID'),
 });
 
-// ✅ Chat endpoint using Gemini
+// ✅ Chat endpoint - now clean and simple
 app.post('/api/chat', async (req: Request, res: Response) => {
    const parseResult = chatSchema.safeParse(req.body);
    if (!parseResult.success) {
-      res.status(400).json(parseResult.error.format());
-      return;
+      return res.status(400).json(parseResult.error.format());
    }
 
    const { prompt, conversationID } = parseResult.data;
 
    try {
-      await conversationRepository.addMessage(conversationID, 'user', prompt);
+      const result = await chatService.getChatReply(prompt, conversationID);
 
-      const history = await conversationRepository.getHistory(conversationID);
-
-      const response = await model.generateContent({
-         contents: history,
-         generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500,
-         },
-      });
-      const reply = response.response.text();
-
-      await conversationRepository.addMessage(conversationID, 'model', reply);
-
-      res.json({ reply });
+      res.json(result);
    } catch (error: any) {
-      console.error('Gemini error:', error);
+      console.error('Controller error:', error);
       res.status(500).json({ error: 'Something went wrong' });
    }
 });
@@ -75,14 +53,18 @@ const resetSchema = z.object({
 app.post('/api/reset', async (req: Request, res: Response) => {
    const parseResult = resetSchema.safeParse(req.body);
    if (!parseResult.success) {
-      res.status(400).json(parseResult.error.format());
-      return;
+      return res.status(400).json(parseResult.error.format());
    }
 
    const { conversationID } = parseResult.data;
 
-   await conversationRepository.clearHistory(conversationID);
-   res.json({ message: 'Chat history cleared' });
+   try {
+      const result = await chatService.resetChat(conversationID);
+      res.json(result);
+   } catch (error: any) {
+      console.error('Controller error:', error);
+      res.status(500).json({ error: 'Something went wrong' });
+   }
 });
 
 // ✅ Start the server
