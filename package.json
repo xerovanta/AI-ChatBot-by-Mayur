@@ -1,25 +1,28 @@
 {
-   "name": "ai",
-   "module": "index.ts",
-   "type": "module",
-   "private": true,
-   "scripts": {
-      "dev": "bun run index.ts",
-      "format": "prettier --write ."
-   },
-   "devDependencies": {
-      "@types/bun": "latest",
-      "@types/express": "^5.0.4",
-      "concurrently": "^9.2.1",
-      "prettier": "^3.6.2"
-   },
-   "peerDependencies": {
-      "typescript": "^5"
-   },
-   "workspaces": [
-      "packages/*"
-   ],
-   "dependencies": {
-      "express": "^5.1.0"
-   }
+  "name": "ai",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run index.ts",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.4",
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
+    "prettier": "^3.6.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
