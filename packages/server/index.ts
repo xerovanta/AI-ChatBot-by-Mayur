@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import z from 'zod';
+import { conversationRepository } from './repositories/conversation.repository';
 
 dotenv.config();
 
@@ -25,8 +26,6 @@ app.get('/api/hello', (req: Request, res: Response) => {
    res.json({ message: 'Hello World !' });
 });
 
-let chatHistory: any[] = [];
-
 const chatSchema = z.object({
    prompt: z
       .string()
@@ -44,15 +43,15 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       return;
    }
 
-   const { prompt } = req.body;
-   if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
+   const { prompt, conversationID } = parseResult.data;
 
    try {
-      // Push user message into history
-      chatHistory.push({ role: 'user', parts: [{ text: prompt }] });
+      await conversationRepository.addMessage(conversationID, 'user', prompt);
+
+      const history = await conversationRepository.getHistory(conversationID);
 
       const response = await model.generateContent({
-         contents: chatHistory,
+         contents: history,
          generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 500,
@@ -60,8 +59,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       });
       const reply = response.response.text();
 
-      // Push AI reply back to history
-      chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+      await conversationRepository.addMessage(conversationID, 'model', reply);
 
       res.json({ reply });
    } catch (error: any) {
@@ -69,9 +67,21 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       res.status(500).json({ error: 'Something went wrong' });
    }
 });
-// Reset chat
-app.post('/api/reset', (req: Request, res: Response) => {
-   chatHistory = [];
+
+const resetSchema = z.object({
+   conversationID: z.string().uuid('Invalid Conversation ID'),
+});
+
+app.post('/api/reset', async (req: Request, res: Response) => {
+   const parseResult = resetSchema.safeParse(req.body);
+   if (!parseResult.success) {
+      res.status(400).json(parseResult.error.format());
+      return;
+   }
+
+   const { conversationID } = parseResult.data;
+
+   await conversationRepository.clearHistory(conversationID);
    res.json({ message: 'Chat history cleared' });
 });
 
