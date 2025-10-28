@@ -2,7 +2,7 @@
 
 A modern AI chatbot application leveraging Google's Gemini 2.5 Flash model for intelligent conversations. Built with a modern tech stack featuring React, TypeScript, and Express.
 
-![Chat Interface](screenshot-url-here) <!-- You can add a screenshot of your chat interface here -->
+![Chat Interface](.github/images/image.png)
 
 ## 🌟 Features
 
@@ -16,6 +16,7 @@ A modern AI chatbot application leveraging Google's Gemini 2.5 Flash model for i
 ## 🚀 Tech Stack
 
 ### Frontend
+
 - **React 19** - UI library
 - **TypeScript** - Type safety
 - **Vite** - Build tool and development server
@@ -25,6 +26,7 @@ A modern AI chatbot application leveraging Google's Gemini 2.5 Flash model for i
 - **React Markdown** - Markdown rendering
 
 ### Backend
+
 - **Express** - Node.js web framework
 - **TypeScript** - Type safety
 - **Bun** - JavaScript runtime and package manager
@@ -40,12 +42,14 @@ A modern AI chatbot application leveraging Google's Gemini 2.5 Flash model for i
 ## 🛠️ Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/xerovanta/AI-ChatBot-by-Mayur.git
 cd AI-ChatBot-by-Mayur
 ```
 
 2. Install dependencies
+
 ```bash
 # Root directory
 bun install
@@ -60,6 +64,7 @@ bun install
 ```
 
 3. Configure environment variables
+
 ```bash
 # In packages/server directory
 cp .env.example .env
@@ -70,12 +75,14 @@ GOOGLE_API_KEY=your_api_key_here
 ## 🚀 Running the Application
 
 1. Start the server
+
 ```bash
 cd packages/server
 bun run dev
 ```
 
 2. Start the client (in a new terminal)
+
 ```bash
 cd packages/client
 bun run dev
