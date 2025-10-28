@@ -1,0 +1,205 @@
+/* ChatBot.css - self-contained styles for the ChatBot component
+   This provides a clean ChatGPT-like dark UI without relying on Tailwind. */
+
+.chatbot-root {
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   max-width: 960px;
+   height: 86vh;
+   margin: 18px auto;
+   background: #0b1020; /* dark background similar to ChatGPT */
+   color: #e6edf3;
+   border-radius: 12px;
+   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+   overflow: hidden;
+}
+
+.chatbot-header {
+   padding: 16px 20px;
+   font-weight: 600;
+   font-size: 16px;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+}
+
+.chatbot-messages {
+   flex: 1 1 auto;
+   padding: 18px;
+   overflow-y: auto;
+   display: flex;
+   flex-direction: column;
+   gap: 14px;
+}
+
+.message-row {
+   display: flex;
+   width: 100%;
+}
+.message-row.bot {
+   justify-content: flex-start;
+}
+.message-row.user {
+   justify-content: flex-end;
+}
+
+.message-bubble {
+   max-width: 78%;
+   padding: 12px 14px;
+   border-radius: 12px;
+   line-height: 1.45;
+   font-size: 15px;
+   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+   word-break: break-word;
+}
+
+.bot-bubble {
+   background: linear-gradient(180deg, #0f1724, #0b1220);
+   color: #dbeafe;
+   border-top-left-radius: 6px;
+}
+
+.user-bubble {
+   background: linear-gradient(180deg, #2b6cb0, #1e4e8c);
+   color: white;
+   border-top-right-radius: 6px;
+}
+
+.message-content p {
+   margin: 0;
+}
+
+.message-bubble.loading {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   min-width: 36px;
+   min-height: 28px;
+   background: rgba(255, 255, 255, 0.02);
+}
+
+.loader {
+   width: 18px;
+   height: 18px;
+   color: #9aa7bd;
+}
+
+.chatbot-input-form {
+   padding: 12px 14px;
+   border-top: 1px solid rgba(255, 255, 255, 0.04);
+   background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.02));
+}
+
+.chatbot-input-wrap {
+   display: flex;
+   gap: 8px;
+   align-items: center;
+}
+
+.chatbot-input {
+   flex: 1 1 auto;
+   padding: 10px 14px;
+   border-radius: 999px;
+   border: 1px solid rgba(255, 255, 255, 0.04);
+   background: rgba(255, 255, 255, 0.02);
+   color: #e6edf3;
+   outline: none;
+   font-size: 14px;
+}
+.chatbot-input:disabled {
+   opacity: 0.6;
+}
+
+.chatbot-send-btn {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   width: 42px;
+   height: 42px;
+   border-radius: 50%;
+   border: none;
+   background: linear-gradient(180deg, #10b981, #059669);
+   color: #fff;
+   cursor: pointer;
+}
+.chatbot-send-btn:disabled {
+   opacity: 0.45;
+   cursor: default;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+   .chatbot-root {
+      height: 92vh;
+      margin: 8px;
+   }
+   .message-bubble {
+      max-width: 86%;
+   }
+}
+
+/* Avatars */
+.avatar {
+   width: 36px;
+   height: 36px;
+   border-radius: 8px;
+   background: linear-gradient(180deg, #0f1724, #0b1220);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   color: #9aa7bd;
+   font-size: 12px;
+   flex: 0 0 36px;
+   margin-right: 10px;
+}
+.user-avatar {
+   margin-left: 10px;
+   margin-right: 0;
+}
+.avatar-initial {
+   font-weight: 600;
+}
+
+/* Message meta (timestamp) */
+.message-meta {
+   margin-top: 6px;
+   display: flex;
+   justify-content: flex-end;
+}
+.message-time {
+   font-size: 12px;
+   color: rgba(255, 255, 255, 0.45);
+}
+
+/* Animations */
+.message-row {
+   opacity: 0;
+   transform: translateY(6px);
+   animation: msg-in 220ms cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+}
+@keyframes msg-in {
+   to {
+      opacity: 1;
+      transform: translateY(0);
+   }
+}
+
+.message-bubble {
+   transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+}
+.message-bubble:hover {
+   transform: translateY(-3px);
+   box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+}
+
+/* Improved textarea behavior */
+.chatbot-input {
+   resize: none;
+   min-height: 40px;
+   max-height: 160px;
+   overflow: auto;
+   padding-top: 10px;
+   padding-bottom: 10px;
+}

@@ -1,16 +1,15 @@
 import { useState, useRef, FormEvent, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { SendHorizonal, Loader2 } from 'lucide-react'; // Re-added Bot for consistency
+import { SendHorizonal, Loader2 } from 'lucide-react'; // icons
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm'; // Make sure this package is installed
+import './ChatBot.css';
 
 // Define the structure for a message
 interface Message {
    id: string;
    role: 'user' | 'model';
    text: string;
+   timestamp: number;
 }
 
 export function ChatBot() {
@@ -35,10 +34,12 @@ export function ChatBot() {
       const trimmedInput = input.trim();
       if (!trimmedInput || isLoading) return;
 
+      const now = Date.now();
       const userMessage: Message = {
          id: crypto.randomUUID(),
          role: 'user',
          text: trimmedInput,
+         timestamp: now,
       };
 
       setMessages((prev) => [...prev, userMessage]);
@@ -48,7 +49,7 @@ export function ChatBot() {
       const modelMessageId = crypto.randomUUID();
       setMessages((prev) => [
          ...prev,
-         { id: modelMessageId, role: 'model', text: '' }, // Start model message empty
+         { id: modelMessageId, role: 'model', text: '', timestamp: Date.now() },
       ]);
 
       try {
@@ -69,6 +70,7 @@ export function ChatBot() {
                errorData.error || `HTTP error! status: ${response.status}`
             );
          }
+
          if (!response.body) throw new Error('No response body');
 
          const reader = response.body.getReader();
@@ -84,7 +86,7 @@ export function ChatBot() {
             }
 
             const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n'); // Process line by line
+            const lines = chunk.split('\n');
 
             for (const line of lines) {
                if (line.startsWith('data: ')) {
@@ -92,7 +94,7 @@ export function ChatBot() {
 
                   if (data === '[DONE]') {
                      loopDone = true;
-                     break; // Exit inner loop
+                     break;
                   }
 
                   if (data) {
@@ -109,12 +111,11 @@ export function ChatBot() {
                            );
                         }
                      } catch (error) {
-                        // Ignore json parsing error if data is not JSON
+                        // ignore non-JSON chunks
                      }
                   }
                }
             }
-            if (loopDone) break; // Exit outer loop if [DONE] was found
          }
 
          if (accumulatedText === '') {
@@ -141,57 +142,64 @@ export function ChatBot() {
       }
    };
 
-   return (
-      <div className="flex flex-col w-full max-w-2xl mx-auto h-[90vh] bg-white dark:bg-gray-900 rounded-lg shadow-2xl overflow-hidden">
-         {/* Header */}
-         <div className="p-5 border-b border-gray-200 dark:border-gray-700 text-lg font-semibold bg-gray-50 dark:bg-gray-800">
-            AI ChatBot
-         </div>
+   // Keyboard handling: Enter to send, Shift+Enter => newline
+   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+         e.preventDefault();
+         const form = (e.target as HTMLElement).closest(
+            'form'
+         ) as HTMLFormElement | null;
+         if (form) form.requestSubmit();
+      }
+   };
 
-         {/* Messages Area */}
+   return (
+      <div className="chatbot-root" role="region" aria-label="Chat">
+         <header className="chatbot-header">AI ChatBot</header>
+
          <div
             ref={scrollAreaRef}
-            className="flex-1 p-6 overflow-y-auto space-y-6 bg-gray-100 dark:bg-gray-900"
+            className="chatbot-messages"
+            data-testid="messages"
          >
             {messages.map((msg) => (
                <MessageItem key={msg.id} message={msg} />
             ))}
+
             {isLoading &&
                messages.length > 0 &&
                messages[messages.length - 1]?.role === 'model' &&
                messages[messages.length - 1]?.text === '' && (
-                  <div className="flex justify-start">
-                     <div className="px-4 py-2 rounded-2xl max-w-[70%] bg-gray-200 dark:bg-gray-800 rounded-bl-none">
-                        <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
+                  <div className="message-row bot">
+                     <div className="message-bubble loading">
+                        <Loader2 className="loader" />
                      </div>
                   </div>
                )}
          </div>
 
-         {/* Input Area */}
-         <form
-            onSubmit={handleSubmit}
-            className="flex items-center p-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 gap-2"
-         >
-            <div className="flex items-center w-full rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 px-3">
-               <input
+         <form onSubmit={handleSubmit} className="chatbot-input-form">
+            <div className="chatbot-input-wrap">
+               <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Send a message..."
-                  className="flex-1 bg-transparent border-none focus:ring-0 outline-none py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  className="chatbot-input"
                   disabled={isLoading}
-                  autoComplete="off"
+                  rows={1}
+                  aria-label="Message input"
                />
                <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="ml-2 h-9 w-9 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white transition disabled:opacity-50"
+                  className="chatbot-send-btn"
                   aria-label="Send message"
                >
                   {isLoading ? (
-                     <Loader2 className="w-5 h-5 animate-spin" />
+                     <Loader2 className="loader" />
                   ) : (
-                     <SendHorizonal className="w-5 h-5" />
+                     <SendHorizonal />
                   )}
                </button>
             </div>
@@ -202,27 +210,41 @@ export function ChatBot() {
    function MessageItem({ message }: { message: Message }) {
       const isUser = message.role === 'user';
 
+      const time = new Date(message.timestamp).toLocaleTimeString([], {
+         hour: '2-digit',
+         minute: '2-digit',
+      });
+
       return (
-         <div
-            className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}
-         >
+         <div className={isUser ? 'message-row user' : 'message-row bot'}>
+            {!isUser && (
+               <div className="avatar" aria-hidden>
+                  <span className="avatar-initial">AI</span>
+               </div>
+            )}
+
             <div
-               className={`
-          px-5 py-3 max-w-[70%] text-base shadow
-          ${
-             isUser
-                ? 'bg-blue-600 text-white rounded-2xl rounded-br-md'
-                : 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md'
-          }
-          mb-2
-        `}
+               className={
+                  isUser
+                     ? 'message-bubble user-bubble'
+                     : 'message-bubble bot-bubble'
+               }
             >
-               <div className="prose prose-sm dark:prose-invert prose-p:my-0 max-w-none text-inherit break-words">
+               <div className="message-content">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                      {message.text}
                   </ReactMarkdown>
                </div>
+               <div className="message-meta">
+                  <time className="message-time">{time}</time>
+               </div>
             </div>
+
+            {isUser && (
+               <div className="avatar user-avatar" aria-hidden>
+                  <span className="avatar-initial">You</span>
+               </div>
+            )}
          </div>
       );
    }
