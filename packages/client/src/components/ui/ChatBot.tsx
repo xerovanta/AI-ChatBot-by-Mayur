@@ -1,10 +1,8 @@
 import { useState, useRef, FormEvent, useEffect } from 'react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SendHorizonal, Bot, User, Loader2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -230,7 +228,7 @@ function MessageItem({ message }: { message: Message }) {
          }`}
       >
          {!isUser && (
-            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0 mt-1">
+            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0 mt-1">
                <Bot className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             </div>
          )}
@@ -244,7 +242,7 @@ function MessageItem({ message }: { message: Message }) {
             {showLoader ? (
                <Loader2 className="w-4 h-4 animate-spin text-current" />
             ) : (
-               <div className="prose prose-sm dark:prose-invert prose-p:my-0 prose-ul:my-1 prose-ol:my-1 prose-strong:font-semibold prose-code:before:content-none prose-code:after:content-none max-w-none text-inherit break-words">
+               <div className="prose prose-sm dark:prose-invert prose-p:my-0 prose-ul:my-1 prose-ol:my-1 prose-strong:font-semibold prose-code:before:content-none prose-code:after:content-none max-w-none text-inherit wrap-break-word">
                   <ReactMarkdown
                      remarkPlugins={[remarkGfm]}
                      components={{
@@ -281,7 +279,7 @@ function MessageItem({ message }: { message: Message }) {
             )}
          </div>
          {isUser && (
-            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0 mt-1">
+            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0 mt-1">
                <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             </div>
          )}
