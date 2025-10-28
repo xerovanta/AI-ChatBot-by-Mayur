@@ -21,7 +21,6 @@ A modern AI chatbot application leveraging Google's Gemini 2.5 Flash model for i
 - **TypeScript** - Type safety
 - **Vite** - Build tool and development server
 - **Shadcn UI** - UI component library
-- **Tailwind CSS** - Utility-first CSS framework
 - **Axios** - HTTP client
 - **React Markdown** - Markdown rendering
 
