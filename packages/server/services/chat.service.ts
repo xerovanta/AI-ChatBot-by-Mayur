@@ -9,7 +9,7 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 class ChatService {
    /**
