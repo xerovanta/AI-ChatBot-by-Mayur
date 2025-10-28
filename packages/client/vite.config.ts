@@ -1,24 +1,23 @@
-import path from 'path';
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import tailwindcss from '@tailwindcss/vite'; // 1. Import the plugin
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
+// https://vitejs.dev/config/
 export default defineConfig({
-   plugins: [
-      react(),
-      tailwindcss(), // 2. Add the plugin here
-   ],
+   plugins: [react()],
    resolve: {
       alias: {
+         // Enable '@' imports from the src directory
          '@': path.resolve(__dirname, './src'),
       },
    },
    server: {
       proxy: {
+         // Proxy API requests to the backend server
          '/api': {
             target: 'http://localhost:3000',
             changeOrigin: true,
-            secure: false, // Add this if your backend is HTTP
+            secure: false, // Disable SSL verification for local development
          },
       },
    },
