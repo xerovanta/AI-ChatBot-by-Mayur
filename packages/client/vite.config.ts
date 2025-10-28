@@ -13,9 +13,12 @@ export default defineConfig({
    },
    server: {
       proxy: {
-         '/api': 'http://localhost:3000',
-
-         // /api/hello -> http://localhost:3000/api/hello
+         // Use the object syntax for more control
+         '/api': {
+            target: 'http://localhost:3000',
+            changeOrigin: true, // Recommended for avoiding CORS/origin issues
+            // secure: false, // Use this if your backend is on https with self-signed cert
+         },
       },
    },
 });

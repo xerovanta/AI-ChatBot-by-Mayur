@@ -1,68 +1,65 @@
 import type { Content } from '@google/generative-ai';
 
+// This defines the roles your chat will use
 type ChatRole = 'user' | 'model';
 
 /**
- * Manages the data layer for conversations.
- * This implementation uses an in-memory Map to store multiple histories.
+ * Manages the data layer for conversations, using a Map
+ * to store history by conversationID.
  */
 class ConversationRepository {
-   /**
-    * Stores all chat histories, keyed by a unique conversationID.
-    * <conversationID, ChatHistory>
-    */
-   private histories: Map<string, Content[]> = new Map();
+   // A Map to hold all conversations.
+   // Key: conversationID (string)
+   // Value: Chat history (Content[])
+   private conversations = new Map<string, Content[]>();
 
    /**
-    * Gets the chat history for a specific conversation,
-    * or creates a new one if it doesn't exist.
-    * @param id - The unique conversation ID.
-    * @returns The chat history array (Content[]).
+    * Retrieves the chat history for a specific conversation.
+    * @param conversationID - The unique ID for this chat.
+    * @returns A promise that resolves to the chat history.
     */
-   private getHistoryForConversation(id: string): Content[] {
-      if (!this.histories.has(id)) {
-         this.histories.set(id, []);
-      }
-      // We use "!" because we've just ensured it exists.
-      return this.histories.get(id)!;
-   }
-
-   /**
-    * Retrieves the entire chat history for a specific conversation.
-    * @param id - The unique conversation ID.
-    * @returns A promise that resolves to the chat history array.
-    */
-   async getHistory(id: string): Promise<Content[]> {
-      const history = this.getHistoryForConversation(id);
-      // Return a *copy* to prevent external modification
+   async getHistory(conversationID: string): Promise<Content[]> {
+      // Get the history for this ID, or an empty array if it's a new chat
+      const history = this.conversations.get(conversationID) || [];
+      // Return a copy
       return [...history];
    }
 
    /**
     * Adds a new message to a specific conversation's history.
-    * @param id - The unique conversation ID.
     * @param role - The role of the sender (user or model).
     * @param text - The content of the message.
-    * @returns A promise that resolves when the message is added.
+    * @param conversationID - The unique ID for this chat.
     */
-   async addMessage(id: string, role: ChatRole, text: string): Promise<void> {
-      const history = this.getHistoryForConversation(id);
+   async addMessage(
+      role: ChatRole,
+      text: string,
+      conversationID: string
+   ): Promise<void> {
       const message: Content = {
          role: role,
          parts: [{ text: text }],
       };
+
+      // Get the current history, or a new array
+      const history = this.conversations.get(conversationID) || [];
+
+      // Add the new message
       history.push(message);
+
+      // Save the updated history back to the Map
+      this.conversations.set(conversationID, history);
    }
 
    /**
     * Clears the chat history for a specific conversation.
-    * @param id - The unique conversation ID.
-    * @returns A promise that resolves when the history is cleared.
+    * @param conversationID - The unique ID for this chat.
     */
-   async clearHistory(id: string): Promise<void> {
-      // Deleting the key from the map effectively clears the history.
-      this.histories.delete(id);
+   async clearHistory(conversationID: string): Promise<void> {
+      // Just delete the entry for this conversation
+      this.conversations.delete(conversationID);
    }
 }
 
+// Export a single instance (Singleton Pattern)
 export const conversationRepository = new ConversationRepository();
