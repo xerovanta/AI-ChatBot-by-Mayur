@@ -171,8 +171,13 @@ export function ChatBot() {
                messages[messages.length - 1]?.role === 'model' &&
                messages[messages.length - 1]?.text === '' && (
                   <div className="message-row bot">
-                     <div className="message-bubble loading">
-                        <Loader2 className="loader" />
+                     <div className="avatar" aria-hidden>
+                        <span className="avatar-initial">AI</span>
+                     </div>
+                     <div className="message-bubble bot-bubble typing-indicator">
+                        <span className="dot"></span>
+                        <span className="dot"></span>
+                        <span className="dot"></span>
                      </div>
                   </div>
                )}
@@ -181,6 +186,7 @@ export function ChatBot() {
          <form onSubmit={handleSubmit} className="chatbot-input-form">
             <div className="chatbot-input-wrap">
                <textarea
+                  autoFocus
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
