@@ -2,7 +2,7 @@ import { useState, useRef, FormEvent, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { SendHorizonal, Loader2 } from 'lucide-react'; // Removed 'Bot'
+import { SendHorizonal, Loader2 } from 'lucide-react'; // Re-added Bot for consistency
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm'; // Make sure this package is installed
 
@@ -141,52 +141,51 @@ export function ChatBot() {
       }
    };
 
-   // Main container
    return (
-      <div className="flex flex-col w-full max-w-2xl mx-auto h-[calc(100vh-4rem)] border bg-white dark:bg-gray-950 rounded-lg shadow-lg overflow-hidden">
+      <div className="flex flex-col w-full max-w-2xl mx-auto h-[90vh] bg-white dark:bg-gray-900 rounded-lg shadow-2xl overflow-hidden">
          {/* Header */}
-         <div className="p-4 border-b dark:border-gray-800 text-lg font-semibold text-gray-800 dark:text-gray-200">
+         <div className="p-5 border-b border-gray-200 dark:border-gray-700 text-lg font-semibold bg-gray-50 dark:bg-gray-800">
             AI ChatBot
          </div>
 
-         {/* Message Area */}
-         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-            <div className="space-y-4">
-               {' '}
-               {/* Adjusted spacing */}
-               {messages.map((msg) => (
-                  <MessageItem key={msg.id} message={msg} />
-               ))}
-               {/* Placeholder for loading state if needed */}
-               {isLoading &&
-                  messages[messages.length - 1]?.role === 'model' &&
-                  messages[messages.length - 1]?.text === '' && (
-                     <div className="flex justify-start">
-                        <div className="px-4 py-2 rounded-2xl max-w-[75%] bg-gray-100 dark:bg-gray-800 rounded-bl-none">
-                           <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
-                        </div>
+         {/* Messages Area */}
+         <div
+            ref={scrollAreaRef}
+            className="flex-1 p-6 overflow-y-auto space-y-6 bg-gray-100 dark:bg-gray-900"
+         >
+            {messages.map((msg) => (
+               <MessageItem key={msg.id} message={msg} />
+            ))}
+            {isLoading &&
+               messages.length > 0 &&
+               messages[messages.length - 1]?.role === 'model' &&
+               messages[messages.length - 1]?.text === '' && (
+                  <div className="flex justify-start">
+                     <div className="px-4 py-2 rounded-2xl max-w-[70%] bg-gray-200 dark:bg-gray-800 rounded-bl-none">
+                        <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
                      </div>
-                  )}
-            </div>
-         </ScrollArea>
+                  </div>
+               )}
+         </div>
 
          {/* Input Area */}
-         <div className="p-4 border-t dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-            <form onSubmit={handleSubmit} className="flex items-center gap-2">
-               <Input
+         <form
+            onSubmit={handleSubmit}
+            className="flex items-center p-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 gap-2"
+         >
+            <div className="flex items-center w-full rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 px-3">
+               <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask anything..."
-                  className="flex-1 border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Send a message..."
+                  className="flex-1 bg-transparent border-none focus:ring-0 outline-none py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                   disabled={isLoading}
                   autoComplete="off"
                />
-               <Button
+               <button
                   type="submit"
-                  variant="default" // Changed back to default
-                  size="icon" // Changed size to icon for just the arrow
-                  className="rounded-lg shrink-0 bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 h-10 w-10" // Adjusted size
                   disabled={isLoading || !input.trim()}
+                  className="ml-2 h-9 w-9 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white transition disabled:opacity-50"
                   aria-label="Send message"
                >
                   {isLoading ? (
@@ -194,68 +193,37 @@ export function ChatBot() {
                   ) : (
                      <SendHorizonal className="w-5 h-5" />
                   )}
-               </Button>
-            </form>
-         </div>
+               </button>
+            </div>
+         </form>
       </div>
    );
-}
 
-// Sub-component for rendering a single message
-function MessageItem({ message }: { message: Message }) {
-   const isUser = message.role === 'user';
-   const showLoader = message.role === 'model' && message.text === ''; // Simplified loading check
+   function MessageItem({ message }: { message: Message }) {
+      const isUser = message.role === 'user';
 
-   return (
-      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      return (
          <div
-            className={`px-4 py-2 rounded-2xl max-w-[75%] text-sm shadow-sm ${
-               // Added shadow
-               isUser
-                  ? 'bg-blue-600 text-white rounded-br-none' // User: Blue background, white text
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-bl-none' // Bot: Light grey background, dark text
-            }`}
+            className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}
          >
-            {showLoader ? (
-               <Loader2 className="w-4 h-4 animate-spin text-current" />
-            ) : (
-               // Wrap markdown in a div for consistent styling control
-               <div className="prose prose-sm dark:prose-invert prose-p:my-0 max-w-none text-inherit wrap-break-word">
-                  <ReactMarkdown
-                     remarkPlugins={[remarkGfm]}
-                     components={{
-                        pre: ({ node, ...props }) => (
-                           <pre
-                              className="my-1 overflow-x-auto rounded bg-black/10 dark:bg-white/10 p-2 text-inherit font-mono text-xs"
-                              {...props}
-                           />
-                        ),
-                        code: ({ node, className, children, ...props }) => {
-                           const inline = (props as any).inline;
-                           const match = /language-(\w+)/.exec(className || '');
-                           return !inline && match ? (
-                              <code
-                                 className={`block rounded font-mono text-xs ${className || ''}`}
-                                 {...props}
-                              >
-                                 {children}
-                              </code>
-                           ) : (
-                              <code
-                                 className={`rounded bg-black/10 dark:bg-white/10 px-1 py-0.5 font-mono text-xs ${className || ''}`}
-                                 {...props}
-                              >
-                                 {children}
-                              </code>
-                           );
-                        },
-                     }}
-                  >
+            <div
+               className={`
+          px-5 py-3 max-w-[70%] text-base shadow
+          ${
+             isUser
+                ? 'bg-blue-600 text-white rounded-2xl rounded-br-md'
+                : 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md'
+          }
+          mb-2
+        `}
+            >
+               <div className="prose prose-sm dark:prose-invert prose-p:my-0 max-w-none text-inherit break-words">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
                      {message.text}
                   </ReactMarkdown>
                </div>
-            )}
+            </div>
          </div>
-      </div>
-   );
+      );
+   }
 }
