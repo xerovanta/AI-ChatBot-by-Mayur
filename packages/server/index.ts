@@ -13,12 +13,13 @@ app.use(
    cors({
       origin: [
          'http://localhost:5173', // local Vite frontend
-         // Add your deployed frontend origin(s) here. Example(s):
-         'https://ai-chatbot-by-mayur.vercel.app', // possible Vercel frontend (older name)
-         'https://ai-chat-bot-by-mayur-client.vercel.app', // common Vercel preview/alias
+         'https://ai-chatbot-by-mayur.vercel.app',
+         'https://ai-chat-bot-by-mayur-client.vercel.app',
+         'https://ai-chat-bot-by-mayur-client-git-main-xerovantas-projects.vercel.app', // Added your actual deployment URL
       ],
       methods: ['GET', 'POST', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true, // Added to support credentials if needed
    })
 );
 // Preflight handled by global CORS middleware above; explicit app.options removed
