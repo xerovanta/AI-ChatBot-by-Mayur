@@ -16,6 +16,8 @@
    },
    "dependencies": {
       "@google/generative-ai": "^0.24.1",
+      "@types/cors": "^2.8.19",
+      "cors": "^2.8.5",
       "dotenv": "^17.2.3",
       "express": "^5.1.0",
       "zod": "^4.1.12"

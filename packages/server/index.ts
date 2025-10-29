@@ -21,8 +21,7 @@ app.use(
       allowedHeaders: ['Content-Type', 'Authorization'],
    })
 );
-// ✅ Handle preflight (OPTIONS) requests globally
-app.options('/api/*', cors());
+// Preflight handled by global CORS middleware above; explicit app.options removed
 
 // ✅ 2. Enable JSON parsing
 app.use(express.json());
