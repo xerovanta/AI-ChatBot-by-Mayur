@@ -53,7 +53,8 @@ export function ChatBot() {
       ]);
 
       try {
-         const response = await fetch('/api/chat/stream', {
+         const API_URL = import.meta.env.VITE_API_URL;
+         const response = await fetch(`${API_URL}/api/chat/stream`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -119,11 +120,52 @@ export function ChatBot() {
          }
 
          if (accumulatedText === '') {
-            setMessages((prev) =>
-               prev.map((msg) =>
-                  msg.id === modelMessageId ? { ...msg, text: '...' } : msg
-               )
-            );
+            // If streaming produced no text, fall back to the non-streaming endpoint.
+            try {
+               const fallbackRes = await fetch(`${API_URL}/api/chat`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                     prompt: trimmedInput,
+                     conversationID: conversationID.current,
+                  }),
+               });
+
+               if (fallbackRes.ok) {
+                  const json = await fallbackRes.json();
+                  const replyText = json.reply || 'No reply';
+                  setMessages((prev) =>
+                     prev.map((msg) =>
+                        msg.id === modelMessageId
+                           ? { ...msg, text: replyText }
+                           : msg
+                     )
+                  );
+               } else {
+                  setMessages((prev) =>
+                     prev.map((msg) =>
+                        msg.id === modelMessageId
+                           ? { ...msg, text: 'Failed to fetch response.' }
+                           : msg
+                     )
+                  );
+               }
+            } catch (fallbackError) {
+               setMessages((prev) =>
+                  prev.map((msg) =>
+                     msg.id === modelMessageId
+                        ? {
+                             ...msg,
+                             text: `Sorry, something went wrong: ${
+                                fallbackError instanceof Error
+                                   ? fallbackError.message
+                                   : String(fallbackError)
+                             }`,
+                          }
+                        : msg
+                  )
+               );
+            }
          }
       } catch (error) {
          console.error('Chat error:', error);
